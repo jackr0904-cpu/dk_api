@@ -337,10 +337,13 @@ def scrape_and_parse_draftkings(log_queue: queue.Queue, league_id: str, category
         else:
             filtered_markets = all_markets
             
-        filtered_market_ids = {m['id'] for m in filtered_markets}
+        filtered_market_ids = {str(m.get('id')) for m in filtered_markets if m.get('id') is not None}
         
         # Filter selections by market IDs
-        filtered_selections = [sel for sel in all_selections if sel.get('marketId') in filtered_market_ids]
+        filtered_selections = [
+            sel for sel in all_selections
+            if sel.get('marketId') is not None and str(sel.get('marketId')) in filtered_market_ids
+         ]
         
         if not filtered_selections:
             log_queue.put("  No selections found for the specified criteria.")
