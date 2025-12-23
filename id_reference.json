@@ -3,27 +3,43 @@
       "category_name": "GAME-SPECIFIC (Category IDs are for individual games)",
       "subcategories": [
         "Game Lines (ID: 492)",
-          
-        "TD Scorers (ID: 1003)",
-            "TD Lines O/U (ID: 12438)",
-          
-        "Passing Props (Category ID: 1000)",
-            "Pass Attempts O/U (ID: 9517)",
-
-        "Receiving Props (Category ID: 1342)",
-            "Receiving Yards O/U (ID: 14114)",
-          
-        "Rushing Props (Category ID: 1001)",
-            "Rush Yards O/U (ID: 9514)",
-            "Rush Attempts O/U (ID: 9518)",
-            "Longest Rush Attempt O/U (ID: 9533)",
-
         "Game Props (ID: 528)",
         "Team Props (ID: 530)",
         "Halves (ID: 526)",
         "Quarters (ID: 527)"
       ]
     },
+
+    {
+      "category_name": "Rushing Props: GAME-SPECIFIC (Category ID: 1001)",
+      "subcategories": [
+        "Rush Yards O/U (ID: 9514)",
+        "Rush Attempts O/U (ID: 9518)",
+        "Longest Rush Attempt O/U (ID: 9533)"
+      ]
+    },
+
+    {
+      "category_name": "Receiving Props: GAME-SPECIFIC (Category ID: 1342)",
+      "subcategories": [
+        "Rec Yards O/U (ID: 14114)",
+      ]
+    },
+
+    {
+      "category_name": "Passing Props: GAME-SPECIFIC (Category ID: 1000)",
+      "subcategories": [
+        "Pass Attempts O/U (ID: 9517)",
+      ]
+    },
+
+    {
+      "category_name": "TD Scorers: GAME-SPECIFIC (Category ID: 1003)",
+      "subcategories": [
+        "TD Lines O/U (ID: 12438)",
+      ]
+    },
+    
     {
       "category_name": "WINS (Category ID: 1286)",
       "subcategories": [
