@@ -5,18 +5,18 @@
         "Game Lines (ID: 492)",
           
         "TD Scorers (ID: 1003)",
-        "  └─ TD Lines O/U (Subcategory ID: 12438)",
+            "TD Lines O/U (ID: 12438)",
           
         "Passing Props (Category ID: 1000)",
-        "  └─ Pass Attempts O/U (Subcategory ID: 9517)",
+            "Pass Attempts O/U (ID: 9517)",
 
-        "Receiving Props (ID: 1342)",
-        "  └─ Receiving Yards O/U (Subcategory ID: 14114)",
+        "Receiving Props (Category ID: 1342)",
+            "Receiving Yards O/U (ID: 14114)",
           
         "Rushing Props (Category ID: 1001)",
-        "  └─ Rush Yards O/U (Subcategory ID: 9514)",
-        "  └─ Rush Attempts O/U (Subcategory ID: 9518)",
-        "  └─ Longest Rush Attempt O/U (Subcategory ID: 9533)",
+            "Rush Yards O/U (ID: 9514)",
+            "Rush Attempts O/U (ID: 9518)",
+            "Longest Rush Attempt O/U (ID: 9533)",
 
         "Game Props (ID: 528)",
         "Team Props (ID: 530)",
