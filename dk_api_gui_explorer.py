@@ -541,11 +541,11 @@ class ScraperApp:
         button_frame.grid(row=0, column=2, rowspan=4, padx=(20, 10), sticky='ns')
         
         self.scrape_button = tk.Button(button_frame, text="Grab Data", command=self.start_scraping_thread, 
-                                      width=15, bg="#4CAF50", fg="white", font=("Helvetica", 10, "bold"))
+                                      width=15, bg="#4CAF50", fg="green")
         self.scrape_button.pack(pady=2, fill=tk.X)
         
         self.analyze_button = tk.Button(button_frame, text="Analyze Only", command=self.analyze_structure_only, 
-                                       width=15, bg="#2196F3", fg="white")
+                                       width=15, bg="#2196F3", fg="green")
         self.analyze_button.pack(pady=2, fill=tk.X)
         
         self.clear_button = tk.Button(button_frame, text="Clear Log", command=self.clear_log, width=15)
