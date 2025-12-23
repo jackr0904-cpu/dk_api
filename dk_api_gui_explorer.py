@@ -292,7 +292,10 @@ def scrape_and_parse_draftkings(log_queue: queue.Queue, league_id: str, category
     log_queue.put(f"Scraping DraftKings API...")
     log_queue.put(f"  League ID: {league_id}, Category ID: {category_id}, Sub-Category ID: {subcategory_id or 'None'}")
     
-    api_url = f"https://sportsbook-nash.draftkings.com/api/sportscontent/dkusoh/v1/leagues/{league_id}/categories/{category_id}"
+    if subcategory_id:
+        api_url = f"https://sportsbook-nash.draftkings.com/api/sportscontent/dkusoh/v1/leagues/{league_id}/categories/{category_id}/subcategories/{subcategory_id}"
+    else:
+        api_url = f"https://sportsbook-nash.draftkings.com/api/sportscontent/dkusoh/v1/leagues/{league_id}/categories/{category_id}"
     
     try:
         response = cffi_requests.get(api_url, impersonate="chrome110", timeout=30)
