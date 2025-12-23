@@ -621,6 +621,8 @@ class ScraperApp:
         self.ref_text_widget.insert(tk.END, "Click any blue ID to auto-fill it on the Scraper tab.\n\n")
         
         reference_data = load_and_format_reference_data()
+        self.reference_data = reference_data
+        
         for category in reference_data:
             cat_name = category['category_name']
             self.ref_text_widget.insert(tk.END, f"{cat_name}\n", "category")
@@ -872,13 +874,94 @@ class ScraperApp:
             messagebox.showinfo("Info", "Raw data export requires re-fetching. This will take a moment...")
             # Re-run with save_raw=True would be needed here
 
+    def _clean_name_from_ref_line(self, s: str) -> str:
+        """
+        Convert 'Rush Yards O/U (ID: 9514)' or 'Rush Yards O/U (Subcategory ID: 9514)'
+        into 'Rush Yards O/U'.
+        """
+        if not s:
+            return ""
+        # strip bullet prefix + whitespace
+        s = s.replace("•", "").strip()
+        # remove anything from the first '(' onward
+        if "(" in s:
+            s = s.split("(", 1)[0].strip()
+        return s
+
+    def lookup_subcategory_name(self, category_id: str, subcategory_id: str) -> str:
+        """
+        Uses self.reference_data (loaded from id_reference.json) to find the
+        subcategory display name for the given category_id + subcategory_id.
+        Works with both '(ID: ####)' and '(Subcategory ID: ####)' styles.
+        """
+        ref = getattr(self, "reference_data", None) or []
+        cat_id = str(category_id).strip()
+        sub_id = str(subcategory_id).strip()
+
+        # helper regexes
+        re_any_id = re.compile(r"(?:ID|Category ID|Subcategory ID)\s*:\s*(\d+)", re.IGNORECASE)
+
+        for section in ref:
+            lines = section.get("subcategories", []) if isinstance(section, dict) else []
+            current_cat = None
+
+            for line in lines:
+                if not isinstance(line, str):
+                    continue
+
+                m = re_any_id.search(line)
+                if m:
+                    found_id = m.group(1)
+
+                    # treat the category ID line as setting context
+                    # (e.g., 'Rushing Props (ID: 1001)')
+                    if found_id == cat_id and ("prop" in line.lower() or "lines" in line.lower() or "scorer" in line.lower() or "game" in line.lower()):
+                        current_cat = cat_id
+                        continue
+
+                    # if we are in the right category context, accept subcategory match
+                    if current_cat == cat_id and found_id == sub_id:
+                        return self._clean_name_from_ref_line(line)
+
+        # fallback: if not found in a strict context search, do a global search by sub_id
+        for section in ref:
+            lines = section.get("subcategories", []) if isinstance(section, dict) else []
+            for line in lines:
+                if isinstance(line, str) and sub_id in line:
+                    return self._clean_name_from_ref_line(line)
+
+        return f"cat{cat_id}_sub{sub_id}"
+
     def save_results(self):
         if self.scraped_df is None or self.scraped_df.empty:
             messagebox.showerror("Error", "No data to save.")
             return
         
+        # Determine IDs currently in the GUI
+        cat_id = (self.category_id_var.get() or "").strip()
+        sub_id = (self.subcategory_id_var.get() or "").strip()
+
+        # Lookup subcategory name (best effort)
+        sub_name = self.lookup_subcategory_name(cat_id, sub_id) if (cat_id and sub_id) else "Scraped_Data"
+
+        # Pull scrape datetime from the dataframe if present; otherwise, use now
+        scrape_dt = None
+        if self.scraped_df is not None and not self.scraped_df.empty:
+            if "Scrape Datetime" in self.scraped_df.columns:
+                scrape_dt = str(self.scraped_df["Scrape Datetime"].iloc[0])
+            elif "scrape_datetime" in self.scraped_df.columns:
+                scrape_dt = str(self.scraped_df["scrape_datetime"].iloc[0])
+
+        if not scrape_dt:
+            scrape_dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # Sanitize for filename (no ':' on macOS)
+        safe_dt = scrape_dt.replace(":", "-").replace("/", "-").strip()
+        default_name = f"{sub_name} - {safe_dt}.csv"
+
         filepath = filedialog.asksaveasfilename(
             defaultextension=".csv",
+            initialfile=default_name,
             filetypes=[("CSV files", "*.csv"), ("Excel files", "*.xlsx")],
             title="Save Scraped Data"
         )
