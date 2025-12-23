@@ -3,8 +3,10 @@
       "category_name": "GAME-SPECIFIC (Category IDs are for individual games)",
       "subcategories": [
         "Game Lines (ID: 492)",
+          
         "TD Scorers (ID: 1003)",
-
+        "  └─ TD Lines O/U (Subcategory ID: 12438)",
+          
         "Passing Props (Category ID: 1000)",
         "  └─ Pass Attempts O/U (Subcategory ID: 9517)",
 
