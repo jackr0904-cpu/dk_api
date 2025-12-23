@@ -892,25 +892,18 @@ class ScraperApp:
         return s
 
     def lookup_category_name(self, category_id: str) -> str:
-        """
-        Uses self.reference_data to find the category display name
-        for the given category_id.
-        """
         ref = getattr(self, "reference_data", None) or []
         cat_id = str(category_id).strip()
-
         re_any_id = re.compile(r"(?:ID|Category ID)\s*:\s*(\d+)", re.IGNORECASE)
 
         for section in ref:
-            lines = section.get("category_name", []) if isinstance(section, dict) else []
-            for line in lines:
-                if not isinstance(line, str):
-                    continue
-
-                m = re_any_id.search(line)
+            if not isinstance(section, dict):
+                continue
+            header = section.get("category_name", "")
+            if isinstance(header, str):
+                m = re_any_id.search(header)
                 if m and m.group(1) == cat_id:
-                    return self._clean_name_from_ref_line(line)
-
+                    return self._clean_name_from_ref_line(header)
         return ""
     
     def lookup_subcategory_name(self, category_id: str, subcategory_id: str) -> str:
