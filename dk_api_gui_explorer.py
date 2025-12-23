@@ -208,69 +208,62 @@ class EnhancedDynamicParser:
         
     def parse_selection(self, selection: Dict, market: Dict, market_type: str) -> Dict[str, Any]:
         """Parse a single selection with enhanced context"""
-        result = {
-            'Subject': 'N/A',
-            'Proposition': 'N/A',
-            'Odds': 'N/A'
-        }
-        
-        # Extract odds
-        odds = selection.get('displayOdds', {}).get('american', '')
-        result['Odds'] = odds.replace('−', '-') if odds else 'N/A'
-        
-        # Extract basic info
-        label = selection.get('label', '')
-        points = selection.get('points')
-        market_name = market.get('name', 'Unknown Market')
-        market_id = market.get('id')
-        
-        # Handle division standings specially
-        if market_type == "division_standings" and label in ['1st', '2nd', '3rd', '4th']:
-            # Get team info from event
-            event_id = self.market_to_event.get(market_id)
+         # ---- Core fields we want for player O/U ----
+        label = selection.get("label", "")                 # "Over" / "Under"
+        points = selection.get("points")                   # line (e.g., 79.5)
+        market_id = selection.get("marketId")
+        market_name = market.get("name", "Unknown Market")
+
+        # odds (normalize unicode minus)
+        odds_raw = (selection.get("displayOdds") or {}).get("american")
+        odds = odds_raw.replace("−", "-") if isinstance(odds_raw, str) else None
+
+        # player from participants (this is the key difference vs parsing from market name)
+        player = None
+        parts = selection.get("participants") or []
+        if parts and isinstance(parts, list):
+            player = (parts[0] or {}).get("name")
+
+        # ---- Event / matchup enrichment ----
+        event_id = None
+        matchup = None
+        start = None
+        if market_id is not None:
+            event_id = self.market_to_event.get(str(market_id)) or self.market_to_event.get(market_id)
             if event_id and event_id in self.events_info:
-                event = self.events_info[event_id]
-                participants = event.get('participants', [])
-                if participants:
-                    team_name = participants[0].get('name', 'Unknown Team')
-                    result['Subject'] = team_name
-                    result['Proposition'] = f"{label} Place"
-                    return result
-        
-        # Handle player props with Over/Under
-        if market_type == "player_props" and label in ['Over', 'Under']:
-            # Extract player from market name (e.g., "Josh Allen - Regular Season Passing Yards")
-            if ' - ' in market_name:
-                player_name = market_name.split(' - ')[0].strip()
-                prop_type = market_name.split(' - ')[1].strip()
-                result['Subject'] = player_name
-                result['Proposition'] = f"{prop_type} - {label} {points}" if points else f"{prop_type} - {label}"
-                return result
-        
-        # Handle threshold markets (e.g., "2750+")
-        if market_type in ["threshold", "rookie_props"] and label.endswith('+'):
-            # Extract player from market name
-            if ' - ' in market_name:
-                player_name = market_name.split(' - ')[0].strip()
-                result['Subject'] = player_name
-            else:
-                result['Subject'] = "Any Player"  # Default if no player specified
-            result['Proposition'] = f"{market_name} - {label}"
-            return result
-        
-        # Standard Over/Under pattern
-        if label in ['Over', 'Under'] and points is not None:
-            # Extract subject from market name
-            subject = self._extract_subject_from_market(market_name)
-            result['Subject'] = subject
-            result['Proposition'] = f"{label} {points}"
-            return result
-        
-        # Default handling
-        result['Subject'] = label
-        result['Proposition'] = market_name
-        
-        return result
+                ev = self.events_info[event_id]
+                start = ev.get("startEventDate") or ev.get("startDate") or ev.get("startTime")
+                ev_parts = ev.get("participants") or []
+                # build "A vs B" if we have two teams
+                if isinstance(ev_parts, list) and len(ev_parts) >= 2:
+                    a = (ev_parts[0] or {}).get("name")
+                    b = (ev_parts[1] or {}).get("name")
+                    if a and b:
+                        matchup = f"{a} vs {b}"
+
+        # ---- Return a normalized row ----
+        # We keep existing columns for compatibility, but add the ones you actually need.
+        row = {
+            "Game": matchup,
+            "Start": start,
+            "Event ID": event_id,
+            "Market": market_name,
+
+            "Player": player,
+            "Bet": label,     # Over / Under
+            "Line": points,   # numeric line
+            "Odds": odds,     # american odds as string, e.g. "-115"
+        }
+
+        # Backward-compat with the rest of the app (these existed before)
+        # Subject: player; Proposition: "Over 79.5"; Odds already set
+        row["Subject"] = player or self._extract_subject_from_market(market_name)
+        if label in ["Over", "Under"] and points is not None:
+            row["Proposition"] = f"{label} {points}"
+        else:
+            row["Proposition"] = market_name
+
+        return row
     
     def _extract_subject_from_market(self, market_name: str) -> str:
         """Extract subject (team/player) from market name"""
