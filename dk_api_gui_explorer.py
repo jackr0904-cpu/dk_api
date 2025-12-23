@@ -10,6 +10,7 @@ from curl_cffi import requests as cffi_requests
 import pandas as pd
 from typing import Dict, Any, List, Tuple, Optional, Set
 from collections import defaultdict, Counter
+from datetime import datetime
 
 # --- HELPER FUNCTION FOR PYINSTALLER ---
 def resource_path(relative_path):
@@ -359,12 +360,15 @@ def scrape_and_parse_draftkings(log_queue: queue.Queue, league_id: str, category
         # Create enhanced parser with event data
         parser = EnhancedDynamicParser(analysis, markets_info, events_info, market_to_event)
         results = []
+
+        scrape_dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         for sel in filtered_selections:
             market_id = sel.get('marketId')
             market = markets_info.get(market_id, {})
             market_name = market.get('name', 'Unknown Market')
             parsed = parser.parse_selection(sel, market, market_type)
+            parsed["Scrape Datetime"] = scrape_dt
             results.append(parsed)
         
         if not results:
@@ -467,14 +471,44 @@ def apply_smart_formatting(df: pd.DataFrame, market_type: str, analysis: Dict) -
         main_lines = line_options.loc[idx]
 
         # 6. Format the final DataFrame for display.
-        main_lines = main_lines.rename(columns={'Subject': 'Participant'})
-        final_cols = ['Participant', 'Line', 'Over Odds', 'Under Odds']
-        
+        # First, capture metadata per (Subject, Line) so we can merge it back after the pivot.
+        meta_cols = []
+        for c in ["Start", "Scrape Datetime", "Event ID", "Game"]:
+            if c in df.columns:
+                meta_cols.append(c)
+
+        if meta_cols:
+            meta = (
+                df.groupby(["Subject", "Line"], as_index=False)[meta_cols]
+                  .first()
+            )
+        else:
+            meta = None
+
+        main_lines = main_lines.rename(columns={"Subject": "Participant"})
+
+        # Merge metadata back in
+        if meta is not None and not meta.empty:
+            main_lines = main_lines.merge(
+                meta,
+                left_on=["Participant", "Line"],
+                right_on=["Subject", "Line"],
+                how="left"
+            ).drop(columns=["Subject"])
+
         # Ensure data types are correct for the final output
-        main_lines['Over Odds'] = main_lines['Over Odds'].astype(int)
-        main_lines['Under Odds'] = main_lines['Under Odds'].astype(int)
+        main_lines["Over Odds"] = main_lines["Over Odds"].astype(int)
+        main_lines["Under Odds"] = main_lines["Under Odds"].astype(int)
+
+        # Output columns (add Start + Scrape Datetime)
+        final_cols = ["Participant", "Line", "Over Odds", "Under Odds"]
+        if "Start" in main_lines.columns:
+            final_cols.append("Start")
+        if "Scrape Datetime" in main_lines.columns:
+            final_cols.append("Scrape Datetime")
 
         return main_lines[final_cols].reset_index(drop=True)
+
 
     # Return the original dataframe if the market type is not 'over_under'.
     return df
