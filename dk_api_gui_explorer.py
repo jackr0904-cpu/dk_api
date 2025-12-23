@@ -326,8 +326,10 @@ def scrape_and_parse_draftkings(log_queue: queue.Queue, league_id: str, category
         # Create market to event mapping
         market_to_event = {}
         for market in all_markets:
-            if 'eventId' in market:
-                market_to_event[market['id']] = market['eventId']
+            mid = market.get("id")
+            eid = market.get("eventId")
+            if mid is not None and eid is not None:
+                market_to_event[str(mid)] = str(eid)
         
         # Filter markets by subcategory if provided
         if subcategory_id:
