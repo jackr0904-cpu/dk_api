@@ -1,5 +1,28 @@
 [
     {
+      "category_name": "GAME-SPECIFIC (Category IDs are for individual games)",
+      "subcategories": [
+        "Game Lines (ID: 492)",
+        "TD Scorers (ID: 1003)",
+
+        "Passing Props (Category ID: 1000)",
+        "  └─ Pass Attempts O/U (Subcategory ID: 9517)",
+
+        "Receiving Props (ID: 1342)",
+        "  └─ Receiving Yards O/U (Subcategory ID: 14114)",
+          
+        "Rushing Props (Category ID: 1001)",
+        "  └─ Rush Yards O/U (Subcategory ID: 9514)",
+        "  └─ Rush Attempts O/U (Subcategory ID: 9518)",
+        "  └─ Longest Rush Attempt O/U (Subcategory ID: 9533)",
+
+        "Game Props (ID: 528)",
+        "Team Props (ID: 530)",
+        "Halves (ID: 526)",
+        "Quarters (ID: 527)"
+      ]
+    },
+    {
       "category_name": "WINS (Category ID: 1286)",
       "subcategories": [
         "Regular Season Wins (ID: 17455)",
@@ -89,27 +112,6 @@
       "subcategories": [
           "This category contains one subcategory for each NFL team.",
           "Example: ARI Cardinals (ID: 8493), ATL Falcons (ID: 8494), etc."
-      ]
-    },
-    {
-      "category_name": "GAME-SPECIFIC (Category IDs are for individual games)",
-      "subcategories": [
-        "Game Lines (ID: 492)",
-        "TD Scorers (ID: 1003)",
-
-        "Passing Props (Category ID: 1000)",
-        "  └─ Pass Attempts O/U (Subcategory ID: 9517)",
-
-        "Receiving Props (ID: 1342)",
-
-        "Rushing Props (Category ID: 1001)",
-         "  └─ Rush Yards O/U (Subcategory ID: 9514)",
-        "  └─ Rush Attempts O/U (Subcategory ID: 9518)",
-
-        "Game Props (ID: 528)",
-        "Team Props (ID: 530)",
-        "Halves (ID: 526)",
-        "Quarters (ID: 527)"
       ]
     }
   ]
