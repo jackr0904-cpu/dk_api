@@ -367,8 +367,13 @@ def scrape_and_parse_draftkings(log_queue: queue.Queue, league_id: str, category
             market_id = sel.get('marketId')
             market = markets_info.get(market_id, {})
             market_name = market.get('name', 'Unknown Market')
+            
             parsed = parser.parse_selection(sel, market, market_type)
             parsed["Scrape Datetime"] = scrape_dt
+
+            start = parsed.get("Start")
+            parsed["Event Date"] = str(start)[:10] if start else None
+            
             results.append(parsed)
         
         if not results:
@@ -473,7 +478,7 @@ def apply_smart_formatting(df: pd.DataFrame, market_type: str, analysis: Dict) -
         # 6. Format the final DataFrame for display.
         # First, capture metadata per (Subject, Line) so we can merge it back after the pivot.
         meta_cols = []
-        for c in ["Start", "Scrape Datetime", "Event ID", "Game"]:
+        for c in ["Event Date", "Scrape Datetime", "Event ID", "Game"]:
             if c in df.columns:
                 meta_cols.append(c)
 
@@ -502,8 +507,8 @@ def apply_smart_formatting(df: pd.DataFrame, market_type: str, analysis: Dict) -
 
         # Output columns (add Start + Scrape Datetime)
         final_cols = ["Participant", "Line", "Over Odds", "Under Odds"]
-        if "Start" in main_lines.columns:
-            final_cols.append("Start")
+        if "Event Date" in main_lines.columns:
+            final_cols.append("Event Date")
         if "Scrape Datetime" in main_lines.columns:
             final_cols.append("Scrape Datetime")
 
