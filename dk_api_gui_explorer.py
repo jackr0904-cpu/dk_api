@@ -902,7 +902,7 @@ class ScraperApp:
         re_any_id = re.compile(r"(?:ID|Category ID)\s*:\s*(\d+)", re.IGNORECASE)
 
         for section in ref:
-            lines = section.get("subcategories", []) if isinstance(section, dict) else []
+            lines = section.get("category_name", []) if isinstance(section, dict) else []
             for line in lines:
                 if not isinstance(line, str):
                     continue
