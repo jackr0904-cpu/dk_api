@@ -891,6 +891,28 @@ class ScraperApp:
             s = s.split("(", 1)[0].strip()
         return s
 
+    def lookup_category_name(self, category_id: str) -> str:
+        """
+        Uses self.reference_data to find the category display name
+        for the given category_id.
+        """
+        ref = getattr(self, "reference_data", None) or []
+        cat_id = str(category_id).strip()
+
+        re_any_id = re.compile(r"(?:ID|Category ID)\s*:\s*(\d+)", re.IGNORECASE)
+
+        for section in ref:
+            lines = section.get("subcategories", []) if isinstance(section, dict) else []
+            for line in lines:
+                if not isinstance(line, str):
+                    continue
+
+                m = re_any_id.search(line)
+                if m and m.group(1) == cat_id:
+                    return self._clean_name_from_ref_line(line)
+
+        return ""
+    
     def lookup_subcategory_name(self, category_id: str, subcategory_id: str) -> str:
         """
         Uses self.reference_data (loaded from id_reference.json) to find the
@@ -945,9 +967,16 @@ class ScraperApp:
         sub_id = (self.subcategory_id_var.get() or "").strip()
 
         # Lookup subcategory name (best effort)
-        sub_name = self.lookup_subcategory_name(cat_id, sub_id) if (cat_id and sub_id) else "Scraped_Data"
-
-        # Pull scrape datetime from the dataframe if present; otherwise, use now
+        sub_name = ""
+        cat_name = ""
+        if cat_id and sub_id:
+            sub_name = self.lookup_subcategory_name(cat_id, sub_id)
+        # If subcategory not found (or sub_id empty), fall back to category name
+        if not sub_name and cat_id:
+            cat_name = self.lookup_category_name(cat_id)
+        # Final name resolution
+        base_name = sub_name or cat_name or "Scraped_Data"
+         # Pull scrape datetime from the dataframe if present; otherwise, use now
         scrape_dt = None
         if self.scraped_df is not None and not self.scraped_df.empty:
             if "Scrape Datetime" in self.scraped_df.columns:
@@ -960,7 +989,7 @@ class ScraperApp:
 
         # Sanitize for filename (no ':' on macOS)
         safe_dt = scrape_dt.replace(":", "-").replace("/", "-").strip()
-        default_name = f"{sub_name} - {safe_dt}.csv"
+        default_name = f"{base_name} | {safe_dt}.csv"
 
         filepath = filedialog.asksaveasfilename(
             defaultextension=".csv",
