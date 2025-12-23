@@ -372,7 +372,7 @@ def scrape_and_parse_draftkings(log_queue: queue.Queue, league_id: str, category
             market_name = market.get('name', 'Unknown Market')
             
             parsed = parser.parse_selection(sel, market, market_type)
-            parsed["Scrape Datetime"] = scrape_dt
+            parsed["Scrape Datetime"] = scrape_datetime
 
             start = parsed.get("Start")
             parsed["Event Date"] = str(start)[:10] if start else None
