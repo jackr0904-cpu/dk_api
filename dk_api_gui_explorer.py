@@ -364,7 +364,7 @@ def scrape_and_parse_draftkings(log_queue: queue.Queue, league_id: str, category
         now = datetime.now()
         scrape_date_str = now.strftime("%Y-%m-%d")
         scrape_time_str = now.strftime("%I.%M.%S %p").lstrip("0")
-        scrape_datetime = f"{scrape_date_str} {scrape_time_str}"
+        scrape_datetime = f"{scrape_date_str} | {scrape_time_str}"
         
         for sel in filtered_selections:
             market_id = sel.get('marketId')
