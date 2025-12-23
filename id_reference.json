@@ -2,7 +2,6 @@
     {
       "category_name": "GAME-SPECIFIC (Category IDs are for individual games)",
       "subcategories": [
-        "Game Lines (ID: 492)",
         "Game Props (ID: 528)",
         "Team Props (ID: 530)",
         "Halves (ID: 526)",
@@ -41,7 +40,10 @@
     },
 
     {
-      "category_name": "Game Lines: GAME-SPECIFIC (Category ID: 492)"
+      "category_name": "Game Lines: GAME-SPECIFIC (Category ID: 492)",
+      "subcategories": [
+        "Moneyline|Spread|Total (ID: 0)"
+      ]
     },
     
     {
